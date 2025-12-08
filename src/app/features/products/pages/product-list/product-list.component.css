@@ -1,0 +1,19 @@
+.pagination {
+  margin-bottom: 0;
+}
+
+.page-link {
+  cursor: pointer;
+  min-width: 40px;
+  text-align: center;
+}
+
+.page-item.active .page-link {
+  background-color: #4a6fa5;
+  border-color: #4a6fa5;
+}
+
+.page-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

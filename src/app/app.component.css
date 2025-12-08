@@ -1,0 +1,9 @@
+
+.navbar {
+      padding: 1rem 0;
+    }
+
+    .nav-link.active {
+      font-weight: 600;
+      border-bottom: 2px solid white;
+    }

@@ -1,0 +1,72 @@
+<div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">
+          <i class="bi bi-funnel me-2"></i>Filtres et Tri
+        </h5>
+
+        <div class="row g-3">
+          <!-- Recherche par nom -->
+          <div class="col-md-4">
+            <label for="searchInput" class="form-label">Recherche</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-search"></i>
+              </span>
+              <input
+                type="text"
+                id="searchInput"
+                class="form-control"
+                placeholder="Nom du produit..."
+                [(ngModel)]="filters.name"
+                (ngModelChange)="onFilterChange()"
+              >
+            </div>
+          </div>
+
+          <!-- Filtre par catégorie -->
+          <div class="col-md-4">
+            <label for="categorySelect" class="form-label">Catégorie</label>
+            <select
+              id="categorySelect"
+              class="form-select"
+              [(ngModel)]="filters.category"
+              (ngModelChange)="onFilterChange()"
+            >
+              <option value="">Toutes les catégories</option>
+              <option *ngFor="let category of categories$ | async" [value]="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Tri -->
+          <div class="col-md-4">
+            <label for="sortSelect" class="form-label">Trier par</label>
+            <select
+              id="sortSelect"
+              class="form-select"
+              [(ngModel)]="sortOption"
+              (ngModelChange)="onSortChange()"
+            >
+              <option value="price-asc">Prix (croissant)</option>
+              <option value="price-desc">Prix (décroissant)</option>
+              <option value="name-asc">Nom (A-Z)</option>
+              <option value="name-desc">Nom (Z-A)</option>
+            </select>
+          </div>
+
+          <!-- Boutons d'action -->
+          <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+              <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
+                <i class="bi bi-x-circle me-1"></i> Effacer les filtres
+              </button>
+
+              <span class="text-muted small" *ngIf="totalProducts$ | async as total">
+                {{ total }} produit(s) trouvé(s)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

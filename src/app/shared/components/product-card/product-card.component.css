@@ -1,0 +1,17 @@
+.product-image {
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .card {
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .btn-success {
+      background-color: #198754;
+      border-color: #198754;
+    }
