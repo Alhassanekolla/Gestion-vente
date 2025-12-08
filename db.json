@@ -1,0 +1,78 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "MacBook Pro 16\"",
+      "price": 2500000,
+      "category": "Tech",
+      "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop",
+      "description": "Ordinateur portable haut de gamme pour professionnels"
+    },
+    {
+      "id": 2,
+      "name": "iPhone 15 Pro",
+      "price": 1200000,
+      "category": "Tech",
+      "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop",
+      "description": "Smartphone flagship avec camera avancée"
+    },
+    {
+      "id": 3,
+      "name": "Air Jordan 1",
+      "price": 180000,
+      "category": "Fashion",
+      "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop",
+      "description": "Chaussures de sport iconiques"
+    },
+    {
+      "id": 4,
+      "name": "Samsung Galaxy S24",
+      "price": 900000,
+      "category": "Tech",
+      "image": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop",
+      "description": "Smartphone Android performant"
+    },
+    {
+      "id": 5,
+      "name": "Casque Sony WH-1000XM4",
+      "price": 350000,
+      "category": "Tech",
+      "image": "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=300&fit=crop",
+      "description": "Casque audio sans fil avec réduction de bruit"
+    },
+    {
+      "id": 6,
+      "name": "Montre Rolex Submariner",
+      "price": 8500000,
+      "category": "Fashion",
+      "image": "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=300&fit=crop",
+      "description": "Montre de plongée luxueuse"
+    },
+    {
+      "id": 7,
+      "name": "iPad Air",
+      "price": 750000,
+      "category": "Tech",
+      "image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop",
+      "description": "Tablette polyvalente pour créatifs"
+    },
+    {
+      "id": 8,
+      "name": "Sac à dos The North Face",
+      "price": 120000,
+      "category": "Fashion",
+      "image": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop",
+      "description": "Sac robuste pour aventures en plein air"
+    },
+    {
+      "id": 9,
+      "name": "Lunettes de soleil Ray-Ban",
+      "price": 160000,
+      "category": "Fashion",
+      "image": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=300&fit=crop",
+      "description": "Lunettes iconiques style aviateur"
+    }
+  ],
+  "cart": [],
+  "orders": []
+}
