@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { ProductListComponent } from './features/products/pages/product-list/product-list.component';
 import { CartPageComponent } from './features/cart/pages/cart-page/cart-page.component';
+import { OfflineInfoComponent } from './features/offline/pages/offline-info/offline-info.component';
 
 export const routes: Routes = [
   {path:'',redirectTo:'/products',pathMatch:'full'},
@@ -13,5 +14,9 @@ export const routes: Routes = [
     path:'cart',
     component:CartPageComponent,
     title:"Etat du panier"
+  },
+  {
+    path:'offline-info',
+    component:OfflineInfoComponent
   }
 ];

@@ -7,3 +7,40 @@
       font-weight: 600;
       border-bottom: 2px solid white;
     }
+
+
+ .navbar {
+      padding: 1rem 0;
+    }
+
+    .nav-link.active {
+      font-weight: 600;
+      border-bottom: 2px solid white;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .navbar {
+      padding: 1rem 0;
+    }
+
+    .nav-link.active {
+      font-weight: 600;
+      border-bottom: 2px solid white;
+    }
+
+    .badge.bg-success {
+      background-color: var(--online-color) !important;
+    }
+
+    .badge.bg-danger {
+      background-color: var(--offline-color) !important;
+    }
+
+    .badge.bg-warning {
+      background-color: #ffc107 !important;
+      color: #000;
+    }
