@@ -10,11 +10,13 @@ import { CommonModule } from '@angular/common';
   styleUrl: './product-card.component.css'
 })
 export class ProductCardComponent {
-  @Input() product!: Product;
+   @Input() product!: Product;
   @Input() isInCart = false;
   @Output() addToCart = new EventEmitter<Product>();
 
   defaultImage = 'https://picsum.photos/seed/default/300/200';
+
+  constructor() {}
 
   onAddToCart(): void {
     if (this.product.stock > 0) {

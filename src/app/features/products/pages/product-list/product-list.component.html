@@ -11,7 +11,7 @@
     <app-product-filters></app-product-filters>
 
     <!-- Liste des produits -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
       <div class="col" *ngFor="let product of paginatedProducts$ | async">
         <app-product-card
           [product]="product"

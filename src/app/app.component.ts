@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
+import { CartStateService } from './features/cart/services/cart-state.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,18 @@ import { RouterModule, RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-   isOnline = navigator.onLine;
-  cartItemCount$ = null; // À implémenter plus tard
+  private cartStateService = inject(CartStateService)
+  isOnline = navigator.onLine;
+  cartCount$ = this.cartStateService.cartCount$;
+
+
+  ngOnInit(): void {
+    // Écouter les changements de statut réseau
+    window.addEventListener('online', () => this.updateOnlineStatus());
+    window.addEventListener('offline', () => this.updateOnlineStatus());
+  }
+
+  updateOnlineStatus(): void {
+    this.isOnline = navigator.onLine;
+  }
 }

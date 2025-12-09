@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProductCardComponent } from '../../../../shared/components/product-card/product-card.component';
 import { ProductFiltersComponent } from '../../components/product-filters/product-filters.component';
+import { CartStateService } from '../../../cart/services/cart-state.service';
 
 
 
@@ -22,24 +23,45 @@ import { ProductFiltersComponent } from '../../components/product-filters/produc
 
 export class ProductListComponent implements OnInit {
   private productStateService = inject(ProductStateService)
+  private cartStateService = inject(CartStateService)
 
   paginatedProducts$ = this.productStateService.paginatedProducts$;
   currentPage$ = this.productStateService.currentPage$;
   totalPages$ = this.productStateService.totalPages$;
-
+  isProductInCartMap = new Map<number, boolean>();
 
   private cartItems: number[] = [];
 
 
 
   ngOnInit(): void {
+       // S'abonner aux changements du panier
+    this.cartStateService.cartItems$.subscribe(items => {
+      const productIds = new Set(items.map(item => item.productId));
 
+      // Mettre à jour la map
+      this.isProductInCartMap.clear();
+      productIds.forEach(id => this.isProductInCartMap.set(id, true));
+    });
   }
 
+
+
   addProductToCart(product: any): void {
-    console.log('Ajout au panier:', product);
-    // TODO: Implémenter l'ajout au panier
-    this.cartItems.push(product.id);
+    this.cartStateService.addItem(product);
+
+    // Feedback visuel
+    const button = event?.target as HTMLElement;
+    if (button) {
+      const originalText = button.innerHTML;
+      button.innerHTML = '<i class="bi bi-check-circle"></i> Ajouté!';
+      button.classList.add('btn-success');
+
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('btn-success');
+      }, 1500);
+    }
   }
 
   isProductInCart(productId: number): boolean {
