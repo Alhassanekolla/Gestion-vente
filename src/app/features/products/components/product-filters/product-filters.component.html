@@ -1,72 +1,105 @@
-<div class="card shadow-sm mb-4">
-      <div class="card-body">
-        <h5 class="card-title mb-3">
-          <i class="bi bi-funnel me-2"></i>Filtres et Tri
-        </h5>
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-gradient-primary text-black border-0">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-sliders fs-4 me-2"></i>
+      <h5 class="mb-0 fw-semibold">Filtres et Tri</h5>
+    </div>
+  </div>
 
-        <div class="row g-3">
-          <!-- Recherche par nom -->
-          <div class="col-md-4">
-            <label for="searchInput" class="form-label">Recherche</label>
-            <div class="input-group">
-              <span class="input-group-text">
-                <i class="bi bi-search"></i>
-              </span>
-              <input
-                type="text"
-                id="searchInput"
-                class="form-control"
-                placeholder="Nom du produit..."
-                [(ngModel)]="filters.name"
-                (ngModelChange)="onFilterChange()"
-              >
-            </div>
+  <div class="card-body p-4">
+    <div class="row g-4">
+      <!-- Recherche -->
+      <div class="col-lg-4">
+        <label class="form-label fw-medium text-primary mb-2">
+          <i class="bi bi-search me-1"></i>Rechercher
+        </label>
+        <div class="input-group input-group-lg shadow-sm">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-secondary"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control border-start-0 ps-0"
+            placeholder="Nom du produit..."
+            [(ngModel)]="searchText"
+            (ngModelChange)="onSearchChange()"
+          >
+        </div>
+        <div class="form-text">Recherchez par nom de produit</div>
+      </div>
+
+      <!-- Catégorie -->
+      <div class="col-lg-4">
+        <label class="form-label fw-medium text-primary mb-2">
+          <i class="bi bi-tag me-1"></i>Catégorie
+        </label>
+        <div class="shadow-sm">
+          <select
+            class="form-select form-select-lg"
+            [(ngModel)]="selectedCategory"
+            (ngModelChange)="onSearchChange()"
+          >
+            <option value="" class="text-muted">Toutes les catégories</option>
+            <option *ngFor="let cat of categories$ | async" [value]="cat" class="text-dark">
+              {{ cat }}
+            </option>
+          </select>
+        </div>
+        <div class="form-text">Filtrez par catégorie</div>
+      </div>
+
+      <!-- Tri -->
+      <div class="col-lg-4">
+        <label class="form-label fw-medium text-primary mb-2">
+          <i class="bi bi-sort-down me-1"></i>Trier par
+        </label>
+        <div class="shadow-sm">
+          <select
+            class="form-select form-select-lg"
+            [(ngModel)]="sortBy"
+            (ngModelChange)="onSortChange()"
+          >
+            <option value="price-asc">
+              <i class="bi bi-arrow-up me-1"></i>Prix croissant
+            </option>
+            <option value="price-desc">
+              <i class="bi bi-arrow-down me-1"></i>Prix décroissant
+            </option>
+            <option value="name-asc">
+              <i class="bi bi-sort-alpha-down me-1"></i>Nom A-Z
+            </option>
+            <option value="name-desc">
+              <i class="bi bi-sort-alpha-up me-1"></i>Nom Z-A
+            </option>
+          </select>
+        </div>
+        <div class="form-text">Organisez les résultats</div>
+      </div>
+    </div>
+
+    <!-- Actions et compteur -->
+    <div class="row mt-4 pt-3 border-top">
+      <div class="col-md-6 d-flex align-items-center">
+        <button class="btn btn-outline-danger px-4 rounded-pill" (click)="clearAll()">
+          <i class="bi bi-arrow-counterclockwise me-2"></i>
+          Réinitialiser les filtres
+        </button>
+      </div>
+
+      <div class="col-md-6 text-md-end">
+        <div class="d-flex align-items-center justify-content-md-end">
+          <div class="me-3">
+            <span class="badge bg-info rounded-pill p-2">
+              <i class="bi bi-grid me-1"></i>
+              {{ productCount }} produit(s)
+            </span>
           </div>
-
-          <!-- Filtre par catégorie -->
-          <div class="col-md-4">
-            <label for="categorySelect" class="form-label">Catégorie</label>
-            <select
-              id="categorySelect"
-              class="form-select"
-              [(ngModel)]="filters.category"
-              (ngModelChange)="onFilterChange()"
-            >
-              <option value="">Toutes les catégories</option>
-              <option *ngFor="let category of categories$ | async" [value]="category">
-                {{ category }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Tri -->
-          <div class="col-md-4">
-            <label for="sortSelect" class="form-label">Trier par</label>
-            <select
-              id="sortSelect"
-              class="form-select"
-              [(ngModel)]="sortOption"
-              (ngModelChange)="onSortChange()"
-            >
-              <option value="price-asc">Prix (croissant)</option>
-              <option value="price-desc">Prix (décroissant)</option>
-              <option value="name-asc">Nom (A-Z)</option>
-              <option value="name-desc">Nom (Z-A)</option>
-            </select>
-          </div>
-
-          <!-- Boutons d'action -->
-          <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-              <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
-                <i class="bi bi-x-circle me-1"></i> Effacer les filtres
-              </button>
-
-              <span class="text-muted small" *ngIf="totalProducts$ | async as total">
-                {{ total }} produit(s) trouvé(s)
-              </span>
-            </div>
+          <div class="text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            Résultats filtrés
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>

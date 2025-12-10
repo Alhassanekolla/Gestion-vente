@@ -7,139 +7,101 @@ import { OfflineManagerService } from '../../../../core/services/offline/offline
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="row mb-4">
-      <div class="col-12">
-        <h1 class="display-6 mb-3">
-          <i class="bi bi-database me-2"></i>Informations Mode Offline
-        </h1>
-        <p class="text-muted">Gestion du stockage local et de la synchronisation.</p>
-      </div>
-    </div>
+    <div class="container mt-4">
+      <h2 class="mb-3">
+        <i class="bi bi-database me-2"></i>Mode Offline
+      </h2>
+      <p class="text-muted mb-4">
+        Gestion du stockage local et synchronisation
+      </p>
 
-    <!-- Carte Statut -->
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <div class="card shadow-sm">
-          <div class="card-header" [class.bg-success]="isOnline" [class.bg-danger]="!isOnline">
-            <h5 class="mb-0 text-white">
-              <i class="bi bi-wifi me-2"></i>Statut Réseau
-            </h5>
+      <!-- Statut -->
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+          <div class="card">
+            <div class="card-body text-center">
+              <i class="bi display-4 mb-3"
+                 [class.bi-wifi]="isOnline"
+                 [class.bi-wifi-off]="!isOnline"
+                 [class.text-success]="isOnline"
+                 [class.text-danger]="!isOnline"></i>
+              <h4>{{ isOnline ? 'En ligne' : 'Hors ligne' }}</h4>
+              <p class="small text-muted">
+                {{ isOnline ? 'Connecté' : 'Mode offline actif' }}
+              </p>
+            </div>
           </div>
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="me-3">
-                <i class="bi display-4" [class.bi-wifi]="isOnline" [class.bi-wifi-off]="!isOnline"
-                   [class.text-success]="isOnline" [class.text-danger]="!isOnline"></i>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <div class="card">
+            <div class="card-body text-center">
+              <i class="bi bi-cloud-arrow-up display-4 text-info mb-3"></i>
+              <h4>{{ queueSize }} actions</h4>
+              <p class="small text-muted">
+                En attente de sync
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stockage -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Stockage local</h5>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-4">
+              <div class="p-3">
+                <div class="h4 mb-2 text-primary">{{ storage.products }}</div>
+                <div class="small text-muted">Produits</div>
               </div>
-              <div>
-                <h3 class="mb-1">{{ isOnline ? 'Connecté' : 'Hors ligne' }}</h3>
-                <p class="text-muted mb-0">
-                  {{ isOnline ? 'Synchronisation automatique activée' : 'Mode offline actif' }}
-                </p>
+            </div>
+            <div class="col-4">
+              <div class="p-3">
+                <div class="h4 mb-2 text-success">{{ storage.cart }}</div>
+                <div class="small text-muted">Panier</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3">
+                <div class="h4 mb-2 text-warning">{{ storage.queue }}</div>
+                <div class="small text-muted">Actions</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="col-md-6">
-        <div class="card shadow-sm">
-          <div class="card-header bg-info text-white">
-            <h5 class="mb-0">
-              <i class="bi bi-cloud-arrow-up me-2"></i>Synchronisation
-            </h5>
-          </div>
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="me-3">
-                <i class="bi bi-clock-history display-4 text-info"></i>
-              </div>
-              <div>
-                <h3 class="mb-1">{{ syncQueueSize }} action(s)</h3>
-                <p class="text-muted mb-0">en attente de synchronisation</p>
-              </div>
+      <!-- Actions -->
+      <div class="card">
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-md-6">
+              <button class="btn btn-outline-primary w-100"
+                      (click)="refresh()"
+                      [disabled]="loading">
+                <i class="bi bi-arrow-clockwise me-1"></i>
+                Actualiser
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Carte Stockage Local -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">
-          <i class="bi bi-hdd me-2"></i>Stockage Local (IndexedDB)
-        </h5>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-4">
-            <div class="text-center p-3 border rounded">
-              <i class="bi bi-grid display-4 text-primary mb-2"></i>
-              <h4>{{ dbInfo.products }}</h4>
-              <p class="text-muted mb-0">Produits stockés</p>
+            <div class="col-md-6">
+              <button class="btn btn-outline-danger w-100"
+                      (click)="clearData()"
+                      [disabled]="loading">
+                <i class="bi bi-trash me-1"></i>
+                Vider cache
+              </button>
             </div>
           </div>
 
-          <div class="col-md-4">
-            <div class="text-center p-3 border rounded">
-              <i class="bi bi-cart display-4 text-success mb-2"></i>
-              <h4>{{ dbInfo.cartItems }}</h4>
-              <p class="text-muted mb-0">Articles en panier</p>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="text-center p-3 border rounded">
-              <i class="bi bi-clock display-4 text-warning mb-2"></i>
-              <h4>{{ dbInfo.pendingActions }}</h4>
-              <p class="text-muted mb-0">Actions en attente</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="card shadow-sm">
-      <div class="card-header bg-secondary text-white">
-        <h5 class="mb-0">
-          <i class="bi bi-gear me-2"></i>Actions
-        </h5>
-      </div>
-      <div class="card-body">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <button
-              class="btn btn-outline-primary w-100"
-              (click)="refreshDatabaseInfo()"
-              [disabled]="loading"
-            >
-              <i class="bi bi-arrow-clockwise me-2" *ngIf="!loading"></i>
-              <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
-              Actualiser les informations
-            </button>
-          </div>
-
-          <div class="col-md-6">
-            <button
-              class="btn btn-outline-danger w-100"
-              (click)="clearOfflineData()"
-              [disabled]="loading"
-            >
-              <i class="bi bi-trash me-2"></i>
-              Vider le cache offline
-            </button>
-          </div>
-
-          <div class="col-12">
-            <div class="alert alert-info">
-              <i class="bi bi-info-circle me-2"></i>
-              <strong>Fonctionnement offline :</strong>
-              Les données sont automatiquement sauvegardées localement.
-              En cas de perte de connexion, vous pouvez continuer à naviguer
-              et modifier votre panier.
-            </div>
+          <div class="mt-4 p-3 bg-light rounded">
+            <p class="mb-0 small">
+              <i class="bi bi-info-circle me-1"></i>
+              Les données sont sauvegardées localement et synchronisées automatiquement quand vous êtes en ligne.
+            </p>
           </div>
         </div>
       </div>
@@ -148,60 +110,80 @@ import { OfflineManagerService } from '../../../../core/services/offline/offline
 })
 export class OfflineInfoComponent implements OnInit {
   isOnline = true;
-  syncQueueSize = 0;
-  dbInfo = {
+  queueSize = 0;
+  storage = {
     products: 0,
-    cartItems: 0,
-    pendingActions: 0
+    cart: 0,
+    queue: 0
   };
   loading = false;
 
-  constructor(private offlineManager: OfflineManagerService) {}
+  constructor(private offline: OfflineManagerService) {}
 
-  ngOnInit(): void {
-    this.loadDatabaseInfo();
+  async ngOnInit() {
+    await this.loadData();
 
-    // S'abonner aux observables
-    this.offlineManager.isOnline$.subscribe(online => {
-      this.isOnline = online;
+
+    window.addEventListener('online', () => {
+      this.isOnline = true;
     });
 
-    this.offlineManager.syncQueueSize$.subscribe(size => {
-      this.syncQueueSize = size;
+    window.addEventListener('offline', () => {
+      this.isOnline = false;
     });
+
+   
+    setInterval(() => {
+      this.checkQueue();
+    }, 5000);
   }
 
-  async loadDatabaseInfo(): Promise<void> {
+  async loadData() {
     this.loading = true;
+
     try {
-      const info = await this.offlineManager.getDatabaseInfo();
-      this.dbInfo = {
-        products: info.products,
-        cartItems: info.cartItems,
-        pendingActions: info.pendingActions
-      };
-      this.isOnline = info.isOnline;
+      // Charger les infos de stockage
+      const products = await this.offline.getCachedProducts();
+      const cart = await this.offline.getCachedCart();
+      const queue = await this.offline.getQueue();
+
+      this.storage.products = products.length;
+      this.storage.cart = cart.length;
+      this.storage.queue = queue.length;
+      this.queueSize = queue.length;
+
+      this.isOnline = navigator.onLine;
     } catch (error) {
-      console.error('Erreur lors du chargement des infos:', error);
+      console.log('Erreur chargement données:', error);
     } finally {
       this.loading = false;
     }
   }
 
-  refreshDatabaseInfo(): void {
-    this.loadDatabaseInfo();
+  async checkQueue() {
+    try {
+      const queue = await this.offline.getQueue();
+      this.queueSize = queue.length;
+      this.storage.queue = queue.length;
+    } catch (error) {
+      console.log('Erreur check queue:', error);
+    }
   }
 
-  async clearOfflineData(): Promise<void> {
-    if (confirm('Êtes-vous sûr de vouloir vider toutes les données offline ? Cette action est irréversible.')) {
+  refresh() {
+    this.loadData();
+  }
+
+  async clearData() {
+    if (confirm('Vider tout le cache local ?')) {
       this.loading = true;
       try {
-        await this.offlineManager.clearAllOfflineData();
-        await this.loadDatabaseInfo();
-        alert('Données offline effacées avec succès');
+        await this.offline.clearAll();
+        await this.loadData();
+        alert('Cache vidé');
       } catch (error) {
-        console.error('Erreur lors du vidage des données:', error);
-        alert('Erreur lors du vidage des données');
+        console.log('Erreur vidage:', error);
+        alert('Erreur');
       } finally {
         this.loading = false;
       }

@@ -28,7 +28,7 @@ import { Product } from '../../../../core/models/product.model';
               <div>
                 <h5 class="card-title mb-1">{{ item.product?.name }}</h5>
                 <p class="card-text text-muted small mb-2">
-                  {{ item.product?.price | currency:'EUR':'symbol':'1.2-2' }} / unité
+                  {{ item.product?.price }} FG / unité
                 </p>
               </div>
 
@@ -75,10 +75,10 @@ import { Product } from '../../../../core/models/product.model';
 
                 <div class="text-end">
                   <div class="h5 mb-0 text-primary">
-                    {{ calculateItemTotal() | currency:'EUR':'symbol':'1.2-2' }}
+                    {{ calculateItemTotal()  }} FG
                   </div>
                   <small class="text-muted">
-                    {{ item.quantity }} × {{ item.product?.price | currency:'EUR':'symbol':'1.2-2' }}
+                    {{ item.quantity }} × {{ item.product?.price  }} FG
                   </small>
                 </div>
               </div>

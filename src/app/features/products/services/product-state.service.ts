@@ -1,159 +1,133 @@
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { ProductApiService } from '../../../core/services/api/product-api.service';
 import { OfflineManagerService } from '../../../core/services/offline/offline-manager.service';
-import { Product, ProductFilters, SortOption } from '../../../core/models/product.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductStateService {
-  private productsSubject = new BehaviorSubject<Product[]>([]);
-  private filtersSubject = new BehaviorSubject<ProductFilters>({
-    name: '',
-    category: ''
-  });
-  private sortSubject = new BehaviorSubject<SortOption>('price-asc');
-  private currentPageSubject = new BehaviorSubject<number>(1);
+  private products = new BehaviorSubject<any[]>([]);
+  private filteredProducts = new BehaviorSubject<any[]>([]);
+  private categories = new BehaviorSubject<string[]>([]);
+
+  private currentPage = 1;
   private itemsPerPage = 6;
 
-  private offlineManager = inject(OfflineManagerService);
+  products$ = this.products.asObservable();
+  filteredProducts$ = this.filteredProducts.asObservable();
+  categories$ = this.categories.asObservable();
 
-  // Observables publics
-  products$ = this.productsSubject.asObservable();
-  filteredProducts$: Observable<Product[]>;
-  categories$: Observable<string[]>;
-  paginatedProducts$: Observable<Product[]>;
-  totalPages$: Observable<number>;
-  currentPage$ = this.currentPageSubject.asObservable();
-
-  constructor(private productApiService: ProductApiService) {
+  constructor(
+    private productApi: ProductApiService,
+    private offline: OfflineManagerService
+  ) {
     this.loadProducts();
-
-    // Récupérer les catégories
-    this.categories$ = this.productApiService.getCategories();
-
-    // Combiner filtres et tri
-    this.filteredProducts$ = combineLatest([
-      this.products$,
-      this.filtersSubject,
-      this.sortSubject
-    ]).pipe(
-      map(([products, filters, sortOption]) => {
-        let filtered = [...products];
-
-        // Filtre par nom
-        if (filters.name) {
-          filtered = filtered.filter(p =>
-            p.name.toLowerCase().includes(filters.name.toLowerCase())
-          );
-        }
-
-        // Filtre par catégorie
-        if (filters.category) {
-          filtered = filtered.filter(p => p.category === filters.category);
-        }
-
-        // Tri
-        return this.sortProducts(filtered, sortOption);
-      })
-    );
-
-    // Pagination
-    this.paginatedProducts$ = combineLatest([
-      this.filteredProducts$,
-      this.currentPage$
-    ]).pipe(
-      map(([products, currentPage]) => {
-        const startIndex = (currentPage - 1) * this.itemsPerPage;
-        return products.slice(startIndex, startIndex + this.itemsPerPage);
-      })
-    );
-
-    // Calcul du nombre total de pages
-    this.totalPages$ = this.filteredProducts$.pipe(
-      map(products => Math.ceil(products.length / this.itemsPerPage))
-    );
   }
 
-  private loadProducts(): void {
-    // Stratégie simplifiée: charger depuis le réseau, puis mettre en cache
-    this.productApiService.getProducts().subscribe({
-      next: (products) => {
-        // Mettre à jour le state
-        this.productsSubject.next(products);
+  loadProducts() {
+    this.productApi.getProducts().subscribe({
+      next: (data) => {
+        this.products.next(data);
+        this.filteredProducts.next(data);
+        this.extractCategories(data);
 
-        // Mettre en cache (silencieusement)
-        this.offlineManager.cacheProducts(products).catch(() => {
-          // Ignorer les erreurs de cache
+        this.offline.cacheProducts(data).catch(() => {
+          console.log('Erreur cache produits');
         });
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des produits:', error);
+        console.log('Erreur API produits:', error);
 
-        // En cas d'erreur, essayer depuis le cache
-        this.offlineManager.getProductsWithCacheFirst()
-          .then(cachedProducts => {
-            if (cachedProducts.length > 0) {
-              this.productsSubject.next(cachedProducts);
-            }
-          })
-          .catch(cacheError => {
-            console.error('Erreur du cache aussi:', cacheError);
-          });
+        this.offline.getCachedProducts().then(cached => {
+          if (cached.length > 0) {
+            this.products.next(cached);
+            this.filteredProducts.next(cached);
+            this.extractCategories(cached);
+          }
+        });
       }
     });
   }
 
-  private sortProducts(products: Product[], sortOption: SortOption): Product[] {
-    const sorted = [...products];
+  private extractCategories(products: any[]) {
+    const cats = [...new Set(products.map(p => p.category))];
+    this.categories.next(cats);
+  }
 
-    switch (sortOption) {
+  updateFilters(name: string, category: string) {
+    let filtered = [...this.products.value];
+
+    if (name) {
+      filtered = filtered.filter(p =>
+        p.name.toLowerCase().includes(name.toLowerCase())
+      );
+    }
+
+    if (category) {
+      filtered = filtered.filter(p => p.category === category);
+    }
+
+    this.filteredProducts.next(filtered);
+    this.currentPage = 1;
+  }
+
+  updateSort(sortBy: string) {
+    const sorted = [...this.filteredProducts.value];
+
+    switch (sortBy) {
       case 'price-asc':
-        return sorted.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => a.price - b.price);
+        break;
       case 'price-desc':
-        return sorted.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => b.price - a.price);
+        break;
       case 'name-asc':
-        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
       case 'name-desc':
-        return sorted.sort((a, b) => b.name.localeCompare(a.name));
-      default:
-        return sorted;
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+    }
+
+    this.filteredProducts.next(sorted);
+  }
+
+  getPaginatedProducts() {
+    const all = this.filteredProducts.value;
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    return all.slice(start, start + this.itemsPerPage);
+  }
+
+  getTotalPages() {
+    return Math.ceil(this.filteredProducts.value.length / this.itemsPerPage);
+  }
+
+  nextPage() {
+    const total = this.getTotalPages();
+    if (this.currentPage < total) {
+      this.currentPage++;
     }
   }
 
-  // Méthodes publiques
-  updateFilters(filters: Partial<ProductFilters>): void {
-    const currentFilters = this.filtersSubject.value;
-    this.filtersSubject.next({ ...currentFilters, ...filters });
-    this.setPage(1); // Réinitialiser à la première page
-  }
-
-  updateSort(sortOption: SortOption): void {
-    this.sortSubject.next(sortOption);
-  }
-
-  setPage(page: number): void {
-    this.currentPageSubject.next(page);
-  }
-
-  nextPage(): void {
-    const current = this.currentPageSubject.value;
-    this.setPage(current + 1);
-  }
-
-  previousPage(): void {
-    const current = this.currentPageSubject.value;
-    if (current > 1) {
-      this.setPage(current - 1);
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
     }
   }
 
-  getProductById(id: number): Product | undefined {
-    return this.productsSubject.value.find(p => p.id === id);
+  goToPage(page: number) {
+    const total = this.getTotalPages();
+    if (page >= 1 && page <= total) {
+      this.currentPage = page;
+    }
   }
 
-  refreshProducts(): void {
-    this.loadProducts();
+  getProductById(id: number) {
+    return this.products.value.find(p => p.id === id);
+  }
+
+  getCurrentPage() {
+    return this.currentPage;
   }
 }

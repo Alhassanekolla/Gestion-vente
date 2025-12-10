@@ -1,49 +1,44 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductStateService } from '../../services/product-state.service';
-import { Product, ProductFilters, SortOption } from '../../../../core/models/product.model';
-import { map } from 'rxjs';
 
 @Component({
   selector: 'app-product-filters',
   standalone: true,
-  imports: [CommonModule,FormsModule],
-  templateUrl: './product-filters.component.html',
-  styleUrl: './product-filters.component.css'
+  imports: [CommonModule, FormsModule],
+  templateUrl: './product-filters.component.html'
 })
 export class ProductFiltersComponent {
+  private productService = inject(ProductStateService);
 
-  filters: ProductFilters = {
-    name: '',
-    category: ''
-  };
+  searchText = '';
+  selectedCategory = '';
+  sortBy = 'price-asc';
 
-  private productStateService = inject(ProductStateService)
+  categories$ = this.productService.categories$;
+  productCount = 0;
 
-  sortOption: SortOption = 'price-asc';
-  categories$ = this.productStateService.categories$;
-  totalProducts$ = this.productStateService.filteredProducts$.pipe(
-    map((products: Product[]) => products.length)
-  );
-
-
-  ngOnInit(): void {
-
+  ngOnInit() {
+    this.productService.filteredProducts$.subscribe(products => {
+      this.productCount = products.length;
+    });
   }
 
-  onFilterChange(): void {
-    this.productStateService.updateFilters(this.filters);
+  onSearchChange() {
+  this.productService.updateFilters(this.searchText, this.selectedCategory);
+}
+
+  onSortChange() {
+    this.productService.updateSort(this.sortBy);
   }
 
-  onSortChange(): void {
-    this.productStateService.updateSort(this.sortOption);
-  }
+  clearAll() {
+    this.searchText = '';
+    this.selectedCategory = '';
+    this.sortBy = 'price-asc';
 
-  clearFilters(): void {
-    this.filters = { name: '', category: '' };
-    this.sortOption = 'price-asc';
-    this.productStateService.updateFilters(this.filters);
-    this.productStateService.updateSort(this.sortOption);
-  }
+    this.productService.updateFilters('', '');
+    this.productService.updateSort('price-asc');
+}
 }

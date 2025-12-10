@@ -17,19 +17,19 @@ import { CommonModule } from '@angular/common';
         <!-- Sous-total -->
         <div class="d-flex justify-content-between mb-2">
           <span>Sous-total</span>
-          <span>{{ subtotal | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <span>{{ subtotal }} FG</span>
         </div>
 
         <!-- Frais de port -->
         <div class="d-flex justify-content-between mb-2">
-          <span>Frais de port</span>
-          <span>{{ shipping | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <span>Frais de Livraison</span>
+          <span>{{ shipping }} FG</span>
         </div>
 
         <!-- Réduction -->
         <div class="d-flex justify-content-between mb-3" *ngIf="discount > 0">
           <span>Réduction</span>
-          <span class="text-success">-{{ discount | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <span class="text-success">-{{ discount}} FG</span>
         </div>
 
         <hr>
@@ -37,7 +37,7 @@ import { CommonModule } from '@angular/common';
         <!-- Total -->
         <div class="d-flex justify-content-between mb-4">
           <strong>Total</strong>
-          <strong class="h5 text-primary">{{ total | currency:'EUR':'symbol':'1.2-2' }}</strong>
+          <strong class="h5 text-primary">{{ total }} FG</strong>
         </div>
 
         <!-- Bouton Commander -->
@@ -75,7 +75,7 @@ import { CommonModule } from '@angular/common';
 })
 export class CartSummaryComponent {
   @Input() subtotal = 0;
-  @Input() shipping = 4.99;
+  @Input() shipping = 15000;
   @Input() discount = 0;
   @Input() itemCount = 0;
   @Input() totalItems = 0;

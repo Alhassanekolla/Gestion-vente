@@ -1,0 +1,75 @@
+/* Ajoute ça dans product-filters.component.css ou dans styles.css global */
+
+/* Gradient pour l'en-tête */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Effet sur les inputs */
+.form-control:focus, .form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+/* Style pour les labels */
+.form-label {
+  color: #2d3748;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+/* Bouton réinitialiser amélioré */
+.btn-outline-danger {
+  border-width: 2px;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+}
+
+/* Badge avec effet */
+.badge.bg-info {
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.badge.bg-info:hover {
+  transform: scale(1.05);
+}
+
+/* Input group amélioré */
+.input-group-lg .form-control,
+.input-group-lg .input-group-text {
+  height: 3.5rem;
+  border-radius: 10px !important;
+}
+
+/* Effet d'ombre sur les cartes */
+.shadow-sm {
+  transition: box-shadow 0.3s ease;
+}
+
+.shadow-sm:hover {
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Sélecteur stylé */
+.form-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23667eea' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px 12px;
+}
+
+/* Animation sur les icônes */
+.bi {
+  transition: transform 0.2s ease;
+}
+
+.btn:hover .bi {
+  transform: scale(1.1);
+}

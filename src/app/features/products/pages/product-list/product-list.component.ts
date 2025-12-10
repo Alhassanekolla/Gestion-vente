@@ -1,96 +1,93 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Product } from '../../../../core/models/product.model';
-import {  ProductStateService } from '../../services/product-state.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProductCardComponent } from '../../../../shared/components/product-card/product-card.component';
 import { ProductFiltersComponent } from '../../components/product-filters/product-filters.component';
+import { ProductStateService } from '../../services/product-state.service';
 import { CartStateService } from '../../../cart/services/cart-state.service';
-
-
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule,
-    RouterModule,
-    ProductCardComponent,
-    ProductFiltersComponent],
-  templateUrl: './product-list.component.html',
-  styleUrl: './product-list.component.css'
+  imports: [CommonModule, RouterModule, ProductCardComponent, ProductFiltersComponent],
+  templateUrl: './product-list.component.html'
 })
-
 export class ProductListComponent implements OnInit {
-  private productStateService = inject(ProductStateService)
-  private cartStateService = inject(CartStateService)
-
-  paginatedProducts$ = this.productStateService.paginatedProducts$;
-  currentPage$ = this.productStateService.currentPage$;
-  totalPages$ = this.productStateService.totalPages$;
-  isProductInCartMap = new Map<number, boolean>();
-
-  private cartItems: number[] = [];
+  private productService = inject(ProductStateService);
+  private cartService = inject(CartStateService);
 
 
+  products: any[] = [];
+  currentPage = 1;
+  totalPages = 1;
 
-  ngOnInit(): void {
-       // S'abonner aux changements du panier
-    this.cartStateService.cartItems$.subscribe(items => {
-      const productIds = new Set(items.map(item => item.productId));
 
-      // Mettre à jour la map
-      this.isProductInCartMap.clear();
-      productIds.forEach(id => this.isProductInCartMap.set(id, true));
+  inCartProducts: number[] = [];
+
+  ngOnInit() {
+
+    this.productService.filteredProducts$.subscribe(products => {
+      this.products = products;
+      this.totalPages = this.productService.getTotalPages();
+      this.currentPage = this.productService.getCurrentPage();
+    });
+
+
+    this.cartService.cartItems$.subscribe(items => {
+      this.inCartProducts = items.map(item => item.productId);
     });
   }
 
+  addToCart(product: any, event?: Event) {
+    this.cartService.addItem(product);
 
+   
+    if (event) {
+      const button = event.target as HTMLElement;
+      if (button) {
+        const original = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check"></i>';
+        button.classList.add('btn-success');
 
-  addProductToCart(product: any): void {
-    this.cartStateService.addItem(product);
-
-    // Feedback visuel
-    const button = event?.target as HTMLElement;
-    if (button) {
-      const originalText = button.innerHTML;
-      button.innerHTML = '<i class="bi bi-check-circle"></i> Ajouté!';
-      button.classList.add('btn-success');
-
-      setTimeout(() => {
-        button.innerHTML = originalText;
-        button.classList.remove('btn-success');
-      }, 1500);
+        setTimeout(() => {
+          button.innerHTML = original;
+          button.classList.remove('btn-success');
+        }, 1000);
+      }
     }
   }
 
-  isProductInCart(productId: number): boolean {
-    return this.cartItems.includes(productId);
+  isInCart(productId: number): boolean {
+    return this.inCartProducts.includes(productId);
   }
 
-  previousPage(): void {
-    this.productStateService.previousPage();
+  prevPage() {
+    this.productService.prevPage();
+    this.currentPage = this.productService.getCurrentPage();
   }
 
-  nextPage(): void {
-    this.productStateService.nextPage();
+  nextPage() {
+    this.productService.nextPage();
+    this.currentPage = this.productService.getCurrentPage();
   }
 
-  goToPage(page: number): void {
-    this.productStateService.setPage(page);
+  goToPage(page: number) {
+    this.productService.goToPage(page);
+    this.currentPage = page;
   }
 
   getPageNumbers(): number[] {
-    // Logique simple pour afficher jusqu'à 5 pages
     const pages: number[] = [];
-    this.totalPages$.subscribe(total => {
-      const current = this.currentPage$;
-      // Implémentation basique
-      for (let i = 1; i <= Math.min(total, 5); i++) {
-        pages.push(i);
-      }
-    }).unsubscribe();
+    const max = Math.min(this.totalPages, 5);
 
-    return pages.length > 0 ? pages : [1];
+    for (let i = 1; i <= max; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  get paginatedProducts() {
+    return this.productService.getPaginatedProducts();
   }
 }

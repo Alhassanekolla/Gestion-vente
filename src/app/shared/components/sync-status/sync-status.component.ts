@@ -1,94 +1,99 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SyncService } from '../../../core/services/sync/sync.service';
+import { OfflineManagerService } from '../../../core/services/offline/offline-manager.service';
 
 @Component({
   selector: 'app-sync-status',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="sync-status" [class.syncing]="isSyncing">
-      <div class="d-flex align-items-center">
-        <div class="status-indicator me-2" [class.syncing]="isSyncing"></div>
+    <div class="d-flex align-items-center border rounded p-2 bg-light">
+      <div class="me-2">
+        <i class="bi"
+           [class.bi-cloud-check]="!syncing && queue === 0"
+           [class.bi-cloud-arrow-up]="!syncing && queue > 0"
+           [class.bi-arrow-repeat]="syncing"
+           [class.spin]="syncing"
+           [class.text-success]="!syncing && queue === 0"
+           [class.text-warning]="!syncing && queue > 0"
+           [class.text-primary]="syncing">
+        </i>
+      </div>
 
-        <div>
-          <small class="d-block text-muted">
-            <i class="bi" [class.bi-cloud-check]="!isSyncing && pendingActions === 0"
-                       [class.bi-cloud-arrow-up]="isSyncing"
-                       [class.bi-cloud-slash]="!isOnline"></i>
-
-            {{ getStatusText() }}
-          </small>
-
-          <small *ngIf="pendingActions > 0" class="text-warning d-block">
-            {{ pendingActions }} action(s) en attente
-          </small>
-
-          <small *ngIf="lastSync" class="text-muted d-block">
-            Dernière synchro: {{ lastSync | date:'HH:mm' }}
-          </small>
+      <div class="me-3">
+        <div class="small">
+          <span *ngIf="syncing">Synchronisation...</span>
+          <span *ngIf="!syncing && queue === 0">Prêt</span>
+          <span *ngIf="!syncing && queue > 0" class="text-warning">
+            {{ queue }} en attente
+          </span>
+        </div>
+        <div class="text-muted small" *ngIf="lastSync">
+          {{ lastSync | date:'HH:mm' }}
         </div>
       </div>
+
+      <button class="btn btn-sm btn-outline-primary"
+              [disabled]="syncing || !online"
+              (click)="startSync()">
+        <i class="bi bi-arrow-repeat"></i>
+      </button>
     </div>
   `,
   styles: [`
-    .status-indicator {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background-color: #28a745;
-      transition: all 0.3s ease;
+    .spin {
+      animation: spin 1s linear infinite;
     }
-
-    .status-indicator.syncing {
-      background-color: #ffc107;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .sync-status.syncing {
-      font-weight: 500;
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
   `]
 })
 export class SyncStatusComponent implements OnInit {
-  isSyncing = false;
-  pendingActions = 0;
-  lastSync?: Date;
-  isOnline = navigator.onLine;
+  syncing = false;
+  queue = 0;
+  lastSync: Date | null = null;
+  online = navigator.onLine;
 
-  constructor(private syncService: SyncService) {}
+  constructor(
+    private syncService: SyncService,
+    private offlineService: OfflineManagerService
+  ) {}
 
-  ngOnInit(): void {
-    // S'abonner au statut de synchronisation
-    this.syncService.syncStatus$.subscribe(status => {
-      this.isSyncing = status.isSyncing;
-      this.pendingActions = status.pendingActions;
-      this.lastSync = status.lastSync;
+  ngOnInit() {
+    this.syncService.isSyncing$.subscribe(state => {
+      this.syncing = state;
     });
 
-    // Écouter les changements de statut réseau
+    this.offlineService.getQueue().then(actions => {
+      this.queue = actions.length;
+    });
+
     window.addEventListener('online', () => {
-      this.isOnline = true;
-      // Tenter une synchronisation automatique
-      if (this.pendingActions > 0) {
-        this.syncService.syncAll();
-      }
+      this.online = true;
     });
 
     window.addEventListener('offline', () => {
-      this.isOnline = false;
+      this.online = false;
     });
   }
 
-  getStatusText(): string {
-    if (this.isSyncing) return 'Synchronisation...';
-    if (!this.isOnline) return 'Hors ligne';
-    if (this.pendingActions > 0) return 'En attente de sync';
-    return 'Synchronisé';
+  async startSync() {
+    if (!this.online) {
+      alert('Hors ligne - impossible de sync');
+      return;
+    }
+
+    try {
+      await this.syncService.sync();
+      this.lastSync = new Date();
+
+      const actions = await this.offlineService.getQueue();
+      this.queue = actions.length;
+    } catch (error) {
+      console.log('Erreur sync', error);
+    }
   }
 }
